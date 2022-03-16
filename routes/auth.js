@@ -86,8 +86,11 @@ router.post("/passwordverify/:userId", verifyToken, async (req, res)=>{
 
         const hasedPassword = CryptoJS.AES.decrypt(user.password, process.env.SECRET_KEY);
         const Originalpassword = hasedPassword.toString(CryptoJS.enc.Utf8);
-        Originalpassword != req.body.oldPassword && res.status(401).json("wrong_pw");
-        res.status(200).json("successfully");
+        if(Originalpassword != req.body.oldPassword){
+            res.status(401).json("wrong_pw");
+        }else{
+            res.status(200).json("successfully");
+        }
     }catch (err){
         res.status(401).json(err);
     }
