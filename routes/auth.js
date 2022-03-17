@@ -1,5 +1,6 @@
 const { verifyToken } = require("./verifyToken");
- 
+var cryptotoken = require("crypto");
+
 const router = require("express").Router();
 const User = require("../models/Users");
 const CryptoJS = require("crypto-js"); 
@@ -74,6 +75,58 @@ router.post("/checktoken", verifyToken, async (req, res)=>{
     }
 });
 
+
+// router.post("/checknumber", verifyToken, async (req, res)=>{
+//     try{
+//         const user = await User.findOne({_id:req.body.userId});
+//         // console.log(user.phonenumberVerified);
+//         if(user.phonenumberVerified === false){
+//             res.status(200).json("not_verified");
+//         }else{
+//             res.status(200).json("verified");
+//         } 
+//         // console.log("daaa"); 
+//     }catch (err){
+//         console.log(err);
+//     }
+// });
+
+
+
+// router.post("/sendcodecheck", verifyToken, async (req, res)=>{
+//     try{
+//         const user = await User.findOne({_id:req.body.userId});
+//         var today = new Date();
+//         var lastUpdate = new Date(user.updatedAt);
+//         var difference = (today - lastUpdate);
+//         var diffMin = Math.round(((difference % 86400000) % 3600000) / 60000); // minutes
+//         console.log(diffMin);
+//         if(user.lastTimeCode === false && diffMin < 2){
+//             res.status(200).json("not");
+//         }else{
+//             if(diffMin > 2 && user.codeVerify==="0"){
+//                 var code = cryptotoken.randomBytes(4).toString('hex'); 
+//                 const updateUser = await User.findByIdAndUpdate(req.body.userId, {
+//                     $set: {lastTimeCode:true, codeVerify:code},
+//                 },{new:true});
+//                 res.status(200).json("can"); 
+//                 console.log("EXE 1");
+//             }else{
+//                 console.log("EXE 2");
+//                 if(user.lastTimeCode === true){
+//                     res.status(200).json("can");
+//                     console.log("EXE 2 1");
+//                 }else{
+//                     res.status(200).json("not");
+//                     console.log("EXE 2 2");
+//                 }
+//             }
+//         } 
+//         // console.log("daaa"); 
+//     }catch (err){
+//         console.log(err);
+//     }
+// });
 
 router.post("/passwordverify/:userId", verifyToken, async (req, res)=>{
     console.log(req.body);
