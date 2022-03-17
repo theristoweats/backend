@@ -58,7 +58,7 @@ router.post("/login", async (req, res)=>{
             process.env.JWT_SECRET,
             {expiresIn:"3d"}
         );
-        const {codeVerify, lastTimeCode, phonenumberVerified, password, isAdmin, ...others } = savedUser._doc;
+        const {codeVerify, lastTimeCode, phonenumberVerified, password, isAdmin, ...others } = user._doc;
         res.status(200).json({others, accessToken});
     }catch (err){
         console.log(err);
@@ -76,20 +76,20 @@ router.post("/checktoken", verifyToken, async (req, res)=>{
 });
 
 
-// router.post("/checknumber", verifyToken, async (req, res)=>{
-//     try{
-//         const user = await User.findOne({_id:req.body.userId});
-//         // console.log(user.phonenumberVerified);
-//         if(user.phonenumberVerified === false){
-//             res.status(200).json("not_verified");
-//         }else{
-//             res.status(200).json("verified");
-//         } 
-//         // console.log("daaa"); 
-//     }catch (err){
-//         console.log(err);
-//     }
-// });
+router.post("/checknumber", verifyToken, async (req, res)=>{
+    try{
+        const user = await User.findOne({_id:req.body.userId});
+        // console.log(user.phonenumberVerified);
+        if(user.phonenumberVerified === false){
+            res.status(200).json("not_verified");
+        }else{
+            res.status(200).json("verified");
+        } 
+        // console.log("daaa"); 
+    }catch (err){
+        console.log(err);
+    }
+});
 
 
 
