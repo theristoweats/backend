@@ -26,9 +26,8 @@ router.post("/register", async (req, res) => {
                 }, 
                 process.env.JWT_SECRET,
                 {expiresIn:"3d"}
-            ); 
-
-            const { password, isAdmin, ...others } = savedUser._doc;
+            );  
+            const {codeVerify, lastTimeCode, phonenumberVerified, password, isAdmin, ...others } = savedUser._doc;
 
             res.status(201).json({others, accessToken});
         }else{
@@ -58,9 +57,7 @@ router.post("/login", async (req, res)=>{
             process.env.JWT_SECRET,
             {expiresIn:"3d"}
         );
-
-        const { password, isAdmin, ...others } = user._doc;
-
+        const {codeVerify, lastTimeCode, phonenumberVerified, password, isAdmin, ...others } = savedUser._doc;
         res.status(200).json({others, accessToken});
     }catch (err){
         console.log(err);

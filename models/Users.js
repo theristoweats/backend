@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     fullname: { type: String, required:true, unique:true},
     phonenumber: { type: String, default: "0"},
-    phonenumberVerified: { type: String, default: "0"},
+    phonenumberVerified: { type: Boolean, default: false},
     lastTimeCode: { type: Boolean, default: false},
     codeVerify: { type: String, default: "0"},
     email: {type: String, required:true, unique:true},
