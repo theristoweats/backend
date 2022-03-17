@@ -57,13 +57,17 @@ app.use("/api/admin", adminRoute);
 
 const server = http.createServer(app);
 
+// const io = require('socket.io')(server, );
 
  
 const io = new Server(server, {
-  cors: {
-    origin: "http://eats.theristow.com/",
-    methods: ["GET", "POST"],
-  },
+    cors: {origin: "*"}
+//     cors: {
+//     origin: "http://localhost:3000/",
+//     // methods: ["GET", "POST"],
+//     // allowedHeaders: ["my-custom-header"],
+//     // credentials: true
+//   },
 });
 
 io.on("connection", (socket) => {
