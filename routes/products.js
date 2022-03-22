@@ -33,7 +33,7 @@ router.post("/", async (req,res)=>{
 // });
  
 router.get("/admin", async (req,res)=>{
-    const pageSize = req.query.shown || 12;
+    const pageSize = 12;
     const page = Number(req.query.pageNumber) || 1;
     const name = req.query.name || ''; 
     const nameFilter = name ? { title: { $regex: name, $options: 'i' } } : {};
@@ -56,7 +56,8 @@ router.get("/admin", async (req,res)=>{
   }
 });
 
-router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
+// router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
+router.put("/:id", async (req, res) =>{
  
     try {
         const updateProduct = await Products.findByIdAndUpdate(req.params.id, {
