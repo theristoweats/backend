@@ -21,17 +21,40 @@ router.post("/", async (req,res)=>{
 });
 
 
-router.get("/admin", async (req,res)=>{
+// router.get("/admin", async (req,res)=>{
 
-    try{ 
-        const products = await Products.find(); 
-        res.status(200).json(products);
-    }catch(err){
-        res.status(500).json(err);
-    }
+//     try{ 
+//         const products = await Products.find(); 
+//         res.status(200).json(products);
+//     }catch(err){
+//         res.status(500).json(err);
+//     }
 
-});
+// });
  
+router.get("/admin", async (req,res)=>{
+    const pageSize = req.query.shown || 12;
+    const page = Number(req.query.pageNumber) || 1;
+    const name = req.query.name || ''; 
+    const nameFilter = name ? { title: { $regex: name, $options: 'i' } } : {};
+    
+    try{    
+      const count = await Products.count({
+          ...nameFilter, 
+      }); 
+
+      const products = await Products.find({
+          ...nameFilter, 
+      })
+      // .populate('seller', 'seller.name seller.logo')
+      .skip(pageSize * (page - 1))
+      .limit(pageSize);
+  //   res.send({ products, page, pages: Math.ceil(count / pageSize) });
+      res.send({products, pages: Math.ceil(count / pageSize), totalproducts:count});
+  }catch(err){
+      res.status(501).json(err);
+  }
+});
 
 router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
  
