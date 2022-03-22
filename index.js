@@ -52,6 +52,7 @@ app.use("/api/addresses", addressesRoute);
 app.use("/api/carriers", carriersRoute);
 app.use("/api/dashboard", dashboardRoute); 
 app.use("/api/admin", adminRoute); 
+// app.use("/images", express.static("./products"));
 
 
 
