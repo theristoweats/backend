@@ -67,12 +67,10 @@ router.put("/:id", async (req, res) =>{
     }catch(err){
         res.status(500).json(err);
     }
-
-
-    res.send("user test is successfuly")
 });
 
-router.delete("/:id", verifyTokenAndAdmin, async (req,res)=>{
+// router.delete("/:id", verifyTokenAndAdmin, async (req,res)=>{
+router.delete("/:id", async (req,res)=>{
     try{
         await Products.findByIdAndDelete(req.params.id);
         res.status(200).json("Product has been deleted");
