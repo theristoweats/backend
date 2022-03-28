@@ -7,10 +7,15 @@ const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 
 router.post("/register", async (req, res) => {
+    
+    const now = new Date();
+    const timenow = new Date(now.setHours(now.getHours() + 2));  
+    
     const newUser = new User({  
         fullname: req.body.fullname,
         email: req.body.email,   
-        phonenumber: req.body.phoneNumber,   
+        phonenumber: req.body.phoneNumber,
+        time:timenow,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.SECRET_KEY).toString(),   
     });
 

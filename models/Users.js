@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default:false,
     },
+    time: { type:Date},
 },{
     timestamps: true
 });

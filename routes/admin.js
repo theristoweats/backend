@@ -14,18 +14,17 @@ router.get("/orders", async (req,res)=> {
         const date = new Date();
         const lastDay = new Date(date.setDate(date.getDate() - 1)).toISOString().slice(0, 10);
         const today = new Date().toISOString().slice(0, 10); 
-
         if(filter==="today"){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(today), $lte: new Date(today)}
+                    time: {$gte: new Date(today)}
                 } 
             };
         }
         if(filter==="lastday"){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(lastDay), $lte: new Date(today)}
+                    time: {$gte: new Date(lastDay), $lte: new Date(today)}
                 } 
             };
         }
@@ -33,7 +32,7 @@ router.get("/orders", async (req,res)=> {
         if(filter==="choose_date" && _date === ""){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(today), $lte: new Date(today)}
+                    time: {$gte: new Date(today)}
                 } 
             };
         }else if(filter==="choose_date" && _date !== ""){
@@ -41,7 +40,7 @@ router.get("/orders", async (req,res)=> {
             const ___NEXTDAY = new Date(__date.setDate(__date.getDate() + 1)).toISOString().slice(0, 10);
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(_date), $lte: new Date(___NEXTDAY)}
+                    time: {$gte: new Date(_date), $lte: new Date(___NEXTDAY)}
                 } 
             };
         } 
@@ -111,14 +110,14 @@ router.get("/statisitc", async (req,res)=> {
         if(filter==="today"){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(today)}
+                    time: {$gte: new Date(today)}
                 } 
             };
         }
         if(filter==="lastday"){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(lastDay), $lte: new Date(today)}
+                    time: {$gte: new Date(lastDay), $lte: new Date(today)}
                 } 
             };
         }
@@ -126,7 +125,7 @@ router.get("/statisitc", async (req,res)=> {
         if(filter==="choose_date" && _date === ""){
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(today)}
+                    time: {$gte: new Date(today)}
                 } 
             };
         }else if(filter==="choose_date" && _date !== ""){
@@ -134,18 +133,30 @@ router.get("/statisitc", async (req,res)=> {
             const ___NEXTDAY = new Date(__date.setDate(__date.getDate() + 1)).toISOString().slice(0, 10);
             _filter = { 
                 $match: { 
-                    createdAt: {$gte: new Date(_date), $lte: new Date(___NEXTDAY)}
+                    time: {$gte: new Date(_date), $lte: new Date(___NEXTDAY)}
                 } 
             };
         } 
            
-        const count = await Orders.count({
-            // ...nameFilter, 
-        }); 
+        const count = await Orders.aggregate([
+            // ...nameFilter,  
+            _filter,
+            {
+                $count: "totalCount"
+            }
+        ]); 
+        
+        const usersCount = await Users.aggregate([
+            // ...nameFilter,  
+            _filter,
+            {
+                $count: "totalCount"
+            }
+        ]); 
         
         // const { password, ...others } = orders;
         // console.log(cetDate);
-        res.status(200).json(count);
+        res.status(200).json({orders:count[0].totalCount, revenue:count[0].totalCount*110, users:usersCount[0].totalCount});
     }catch(err){
         res.status(501).json(err);
     }
