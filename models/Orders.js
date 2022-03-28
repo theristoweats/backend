@@ -32,7 +32,7 @@ const OrdersSchema = new mongoose.Schema({
     carrierId:{type:String, default:"0"},
     carrierName:{type:String, default:"0"},
     orderStatus:{type:String, default:"pending"},
-
+    time:{type:Date}
 },{
     timestamps: true
 });

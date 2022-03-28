@@ -14,7 +14,7 @@ const CarriersSchema = new mongoose.Schema({
             }, 
         },
     ], 
-    profilePicture:{type:String},
+    profilePicture:{type:String,default:"0"},
     phoneNumber:{type:String},
     email:{type:String},
     password:{type:String}

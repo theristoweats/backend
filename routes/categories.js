@@ -6,7 +6,8 @@ const router = require("express").Router();
 
 // create product
 
-router.post("/", verifyTokenAndAdmin, async (req,res)=>{
+// router.post("/", verifyTokenAndAdmin, async (req,res)=>{
+router.post("/", async (req,res)=>{
 
     const newCategory = new Categories(req.body); 
     try{
@@ -18,7 +19,8 @@ router.post("/", verifyTokenAndAdmin, async (req,res)=>{
 
 }); 
 
-router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
+// router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
+router.put("/:id", async (req, res) =>{
  
     try {
         const updatedCategory = await Categories.findByIdAndUpdate(req.params.id, {
@@ -28,11 +30,10 @@ router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
     }catch(err){
         res.status(500).json(err);
     }
- 
-    res.send("user test is successfuly")
 });
 
-router.delete("/:id", verifyTokenAndAdmin, async (req,res)=>{
+// router.delete("/:id", verifyTokenAndAdmin, async (req,res)=>{
+router.delete("/:id", async (req,res)=>{
     try{
         await Categories.findByIdAndDelete(req.params.id);
         res.status(200).json("Category has been deleted");

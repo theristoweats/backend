@@ -21,6 +21,9 @@ router.post("/", verifyToken, async (req,res)=>{
             var totalPrice = 0;
             var FetchedItemsCart = [];
 
+            const now = new Date();
+            const timenow = new Date(now.setHours(now.getHours() + 2));  
+
             for(var i=0; i<cart.length; i++){  
                 const _quantity = cart[i].product[0].quantity;
                 const itemID = cart[i]._id;
@@ -54,6 +57,7 @@ router.post("/", verifyToken, async (req,res)=>{
                     carrierId:"0",
                     carrierName:"0",
                     orderStatus:"pending",
+                    time:timenow
                 }
             ); 
             const savedOrder = await order_create.save();
