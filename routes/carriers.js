@@ -1,10 +1,10 @@
-const { verifyToken } = require("./verifyToken");
+const { verifyToken, verifyTokenAndAdmin } = require("./verifyToken");
  
 const router = require("express").Router();
 const Carriers = require("../models/Carriers");
 const CryptoJS = require("crypto-js"); 
 
-router.post("/", async (req, res) => {
+router.post("/", verifyTokenAndAdmin, async (req, res) => {
     try{
         const newCarrier = new Carriers({  
             fullname: req.body.fullname,
@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
 });
 
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyTokenAndAdmin, async (req, res) => {
     try{
         if(req.body.password){
             req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.SECRET_KEY).toString();
@@ -50,7 +50,7 @@ router.put("/:id", async (req, res) => {
 });
 
 
-router.delete("/:id", async (req,res)=>{
+router.delete("/:id", verifyTokenAndAdmin, async (req,res)=>{
     try{
         await Carriers.findByIdAndDelete(req.params.id);
         res.status(200).json("User has been deleted");

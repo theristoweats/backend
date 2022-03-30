@@ -10,7 +10,7 @@ router.post("/register", async (req, res) => {
     
     const now = new Date();
     const timenow = new Date(now.setHours(now.getHours() + 2));  
-    
+
     const newUser = new User({  
         fullname: req.body.fullname,
         email: req.body.email,   
@@ -27,8 +27,7 @@ router.post("/register", async (req, res) => {
 
             const accessToken = jwt.sign(
                 {
-                    id: savedUser._id,
-                    isAdmin: savedUser.isAdmin, 
+                    id: savedUser._id, 
                 }, 
                 process.env.JWT_SECRET,
                 {expiresIn:"3d"}
@@ -58,7 +57,6 @@ router.post("/login", async (req, res)=>{
         const accessToken = jwt.sign(
             {
                 id: user._id,
-                isAdmin: user.isAdmin, 
             }, 
             process.env.JWT_SECRET,
             {expiresIn:"3d"}

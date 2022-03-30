@@ -1,11 +1,13 @@
+const Admin = require("../models/Admin");
 const Carriers = require("../models/Carriers");
 const Orders = require("../models/Orders");
 const Users = require("../models/Users");
 const { verifyToken, verifyTokenAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
 const router = require("express").Router(); 
+const CryptoJS = require("crypto-js"); 
+const jwt = require("jsonwebtoken");
 
-
-router.get("/orders", async (req,res)=> {
+router.get("/orders", verifyTokenAndAdmin, async (req,res)=> {
     try{
         var _filter = {$match: { }};
         const filter = req.query.filter || "today";
@@ -91,13 +93,14 @@ router.get("/orders", async (req,res)=> {
         
         res.status(200).json(orders);
     }catch(err){
+        console.log(err);
         res.status(501).json(err);
     }
 
 });
 
 
-router.get("/statisitc", async (req,res)=> {
+router.get("/statisitc", verifyTokenAndAdmin, async (req,res)=> {
     try{
         var _filter = {$match: { }};
         const filter = req.query.filter || "today";
@@ -152,18 +155,22 @@ router.get("/statisitc", async (req,res)=> {
             {
                 $count: "totalCount"
             }
-        ]); 
+        ]);  
         
         // const { password, ...others } = orders;
         // console.log(cetDate);
-        res.status(200).json({orders:count[0].totalCount, revenue:count[0].totalCount*110, users:usersCount[0].totalCount});
+        res.status(200).json({orders:count.length > 0 ? count[0].totalCount : 0, 
+            revenue:count.length > 0 ? count[0].totalCount*110 : 0, 
+            users:usersCount.length > 0 ? usersCount[0].totalCount : 0});
+
     }catch(err){
+        console.log(err);
         res.status(501).json(err);
     }
 
 });
 
-router.get("/carriers", async (req,res)=> {
+router.get("/carriers", verifyTokenAndAdmin, async (req,res)=> {
     try{
         // const order = await Orders.find();
         
@@ -209,7 +216,7 @@ router.get("/carriers", async (req,res)=> {
 // });
 
 
-router.get("/users", async (req,res)=>{
+router.get("/users", verifyTokenAndAdmin, async (req,res)=>{
     const pageSize = 50;
     const page = Number(req.query.pageNumber) || 1;
     const name = req.query.name || ''; 
@@ -235,7 +242,7 @@ router.get("/users", async (req,res)=>{
 });
 
 
-router.delete("/users/:id", async (req,res)=>{
+router.delete("/users/:id", verifyTokenAndAdmin, async (req,res)=>{
     try{
         await Users.findByIdAndDelete(req.params.id);
         res.status(200).json("User has been deleted");
@@ -243,6 +250,51 @@ router.delete("/users/:id", async (req,res)=>{
         res.status(501).json(err)
     }
 });
+
+
+
+router.post("/login", async (req, res)=>{
+    try{
+        const admin = await Admin.findOne({email:req.body.email});
+        !admin && res.status(401).json(""); 
+
+        const hasedPassword = CryptoJS.AES.decrypt(admin.password, process.env.SECRET_KEY);
+        const Originalpassword = hasedPassword.toString(CryptoJS.enc.Utf8);
+        Originalpassword != req.body.password && res.status(401).json(""); 
+
+        const accessToken = jwt.sign(
+            {
+                id: admin._id,
+            }, 
+            process.env.JWT_SECRET,
+            {expiresIn:"3d"}
+        );
+        const {password, ...others } = admin._doc;
+        res.status(200).json({others, accessToken});
+    }catch (err){
+        console.log(err);
+    }
+});
+
+
+
+// router.post("/register", verifyTokenAndAdmin, async (req, res) => {
+//     req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.SECRET_KEY).toString();
+//     const newAdmin = new Admin(req.body);
+//     console.log(newAdmin);
+//     try{
+//         const admin = await Admin.findOne({email:req.body.email});
+//         if(!admin){
+//             console.log(newAdmin);
+//             const savedAdmin = await newAdmin.save();
+//             res.status(201).json(savedAdmin);
+//         }else{
+//             res.status(405).json("Email taken");
+//         }
+//     }catch(err){
+//         res.status(500).json(err);
+//     }
+// });
  
  
 
