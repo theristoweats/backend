@@ -218,6 +218,7 @@ router.post("/", async (req, res) =>{
         // },{new:true}); 
         res.send({items: FetchedItemsCart});
     }catch(err){
+        console.log("fujjjjjjjjjjjjj" + err);
         res.status(500).json(err);
     } 
 
