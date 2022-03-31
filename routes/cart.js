@@ -153,7 +153,7 @@ router.get("/:user_UUID", async (req, res)=>{
                 totalPrice = totalPrice + productPrice;
             }
     
-            res.send({items: FetchedItemsCart, quantity:count, total:totalPrice});
+            res.status(200).json({items: FetchedItemsCart, quantity:count, total:totalPrice});
         }else{
 
             res.status(500);
