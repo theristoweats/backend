@@ -176,9 +176,10 @@ router.post("/", async (req, res) =>{
         const productId = req.body.product._id.toString(); 
         const price = req.body.product.price;  // get the product price from product category list 
         const quantity = req.body.quantity; 
-        const ip = req.headers['x-forwarded-for'] ||
-            req.socket.remoteAddress ||
-            null; 
+        // const ip = req.headers['x-forwarded-for'] ||
+        //     req.socket.remoteAddress ||
+        //     null; 
+        const ip = null; 
 
         
         const product = await Products.find({_id:productId});
