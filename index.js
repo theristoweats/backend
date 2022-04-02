@@ -101,7 +101,7 @@ io.on("connection", (socket) => {
 });
  
 
-// app.set('socketio', io);
+app.set('socketio', io);
 // export {io};
 
 
