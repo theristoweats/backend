@@ -347,12 +347,13 @@ router.put("/status/:orderId/:type/:carrierID", async (req, res) =>{
         const order_USER = await Orders.find({_id:req.params.orderId});
         const _orderUSER__id = order_USER[0].userId;
 
+        res.status(200).json(updatedOrderStatus);
+        
         const orderStatus = req.params.type;
         const orderIdPro = req.params.orderId;
 
         io.to(orderIdPro).emit('new-status', {orderStatus:orderStatus, carrierID:req.params.carrierID});
         io.to(_orderUSER__id).emit('new-status-order-user', {update:"true"});
-        res.status(200).json(updatedOrderStatus);
     
     }catch(err){
         res.status(500).json(err);
