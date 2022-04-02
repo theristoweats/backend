@@ -111,149 +111,12 @@ router.get("/find/:userId", verifyTokenAuthorization, async (req,res)=>{
     }
 });
 
-router.get("/:user_UUID", async (req, res)=>{
-    try{     
-
-        const user_UUID = req.params.user_UUID;
-        // const cart = await Cart.find({user_UUID:req.params.user_UUID, status:"incart"});
-        // const count = await Cart.count({user_UUID:req.params.user_UUID, status:"incart"});
- 
-        // const total =  0;
-        
-        // const total = await Cart.aggregate([
-        //     { $match: { user_UUID: user_UUID } },
-        //     {
-        //       $group: {
-        //         _id: null,
-        //         totalPrice: { $sum: '$totalPrice' },
-        //       },
-        //     }
-        //   ]);
-        // if(cart){
-        //     for(var i=0; i<cart.length; i++){  
-        //         const _quantity = cart[i].product[0].quantity;
-        //         const itemID = cart[i]._id;
-    
-        //         const productId = cart[i].product[0].productId;
-        //         const product = await Products.find({_id:productId});
-        //         const productImg = product[0].img;
-        //         const productName = product[0].title;
-        //         const productPrice = product[0].price*_quantity;
-        //         const fetchedProdct = { 
-        //             _id:itemID,
-        //             productId:productId,
-        //             img:productImg,
-        //             title:productName,
-        //             quantity:_quantity,
-        //             price:productPrice,
-        //         };
-        //         FetchedItemsCart.push(fetchedProdct);
-        //         totalPrice = totalPrice + productPrice;
-        //     }
-    
-        //     res.status(200).json({items: FetchedItemsCart, quantity:count, total:totalPrice});
-        // }else{
-            
-        //     res.status(500);
-        // }
-         
-        const cartitems = await Cart.aggregate( [
-            { 
-                $match: 
-                { 
-                    user_UUID: user_UUID,
-                    status:"incart"
-                } 
-            },
-            {
-                $addFields: {
-                    "productId": {
-                        "$map": {
-                          "input": "$product",
-                          "in": {
-                            "$mergeObjects": [
-                                "$$this",
-                                {
-                                  "dest_oid": {
-                                    "$toObjectId": "$$this.productId"
-                                  }
-                                }
-                              ]
-                          }
-                        }
-                    },
-                    "_price":{
-                        "$map": {
-                            "input": "$product",
-                            "in": {
-                                "$multiply": [
-                                    "$$this.quantity",
-                                    "$$this.price"
-                                ]
-                            }
-                        }
-                    }
-                },
-                
-            },
-            // { 
-            //     "$unwind": "$products"
-            // }, 
-            // {$unwind: "$productId"},
-
-            {
-                
-               $lookup:
-                  {
-                     from: "products",
-                     localField: "productId.dest_oid",
-                     foreignField: "_id",
-                     as: "product_info"
-                 }
-            },
-            { 
-                "$group": 
-                { 
-                    "_id": null, 
-                    products:
-                    { 
-                        $push: { 
-                            "_id" : "$_id",
-                            "title":  { "$first": "$product_info.title" },  
-                            "img":  { "$first": "$product_info.img" },  
-                            "quantity":  { "$first": "$product.quantity" },  
-                            "price":  { "$first": "$_price" },  
-                            
-                        } 
-                    },
-                    count:{$sum:1}, 
-                    totalAmount:{$sum:{ "$first": "$_price" }}, 
-
-                } 
-            }, 
-             
-        ] ); 
-        res.status(200).json({
-            items: cartitems.length !== 0 ? cartitems[0].products : [], 
-            quantity: cartitems.length !== 0 ? cartitems[0].count : 0, 
-            total: cartitems.length !== 0 ? cartitems[0].totalAmount : 0});
-
-        // const carts = await Cart.find();
-        // res.status(200).json(user_UUID);
-    }catch(err){
-        console.log(err);
-        res.status(500).json(res);
-    }
-}); 
-
 // router.get("/:user_UUID", async (req, res)=>{
-//     try{    
-//         var totalPrice = 0;
-//         var FetchedItemsCart = [];
+//     try{     
 
 //         const user_UUID = req.params.user_UUID;
-//         const cart = await Cart.find({user_UUID:req.params.user_UUID, status:"incart"});
-//         const count = await Cart.count({user_UUID:req.params.user_UUID, status:"incart"});
+//         // const cart = await Cart.find({user_UUID:req.params.user_UUID, status:"incart"});
+//         // const count = await Cart.count({user_UUID:req.params.user_UUID, status:"incart"});
  
 //         // const total =  0;
         
@@ -266,40 +129,178 @@ router.get("/:user_UUID", async (req, res)=>{
 //         //       },
 //         //     }
 //         //   ]);
-//         if(cart){
-//             for(var i=0; i<cart.length; i++){  
-//                 const _quantity = cart[i].product[0].quantity;
-//                 const itemID = cart[i]._id;
+//         // if(cart){
+//         //     for(var i=0; i<cart.length; i++){  
+//         //         const _quantity = cart[i].product[0].quantity;
+//         //         const itemID = cart[i]._id;
     
-//                 const productId = cart[i].product[0].productId;
-//                 const product = await Products.find({_id:productId});
-//                 const productImg = product[0].img;
-//                 const productName = product[0].title;
-//                 const productPrice = product[0].price*_quantity;
-//                 const fetchedProdct = { 
-//                     _id:itemID,
-//                     productId:productId,
-//                     img:productImg,
-//                     title:productName,
-//                     quantity:_quantity,
-//                     price:productPrice,
-//                 };
-//                 FetchedItemsCart.push(fetchedProdct);
-//                 totalPrice = totalPrice + productPrice;
-//             }
+//         //         const productId = cart[i].product[0].productId;
+//         //         const product = await Products.find({_id:productId});
+//         //         const productImg = product[0].img;
+//         //         const productName = product[0].title;
+//         //         const productPrice = product[0].price*_quantity;
+//         //         const fetchedProdct = { 
+//         //             _id:itemID,
+//         //             productId:productId,
+//         //             img:productImg,
+//         //             title:productName,
+//         //             quantity:_quantity,
+//         //             price:productPrice,
+//         //         };
+//         //         FetchedItemsCart.push(fetchedProdct);
+//         //         totalPrice = totalPrice + productPrice;
+//         //     }
     
-//             res.status(200).json({items: FetchedItemsCart, quantity:count, total:totalPrice});
-//         }else{
+//         //     res.status(200).json({items: FetchedItemsCart, quantity:count, total:totalPrice});
+//         // }else{
+            
+//         //     res.status(500);
+//         // }
+         
+//         const cartitems = await Cart.aggregate( [
+//             { 
+//                 $match: 
+//                 { 
+//                     user_UUID: user_UUID,
+//                     status:"incart"
+//                 } 
+//             },
+//             {
+//                 $addFields: {
+//                     "productId": {
+//                         "$map": {
+//                           "input": "$product",
+//                           "in": {
+//                             "$mergeObjects": [
+//                                 "$$this",
+//                                 {
+//                                   "dest_oid": {
+//                                     "$toObjectId": "$$this.productId"
+//                                   }
+//                                 }
+//                               ]
+//                           }
+//                         }
+//                     },
+//                     "_price":{
+//                         "$map": {
+//                             "input": "$product",
+//                             "in": {
+//                                 "$multiply": [
+//                                     "$$this.quantity",
+//                                     "$$this.price"
+//                                 ]
+//                             }
+//                         }
+//                     }
+//                 },
+                
+//             },
+//             // { 
+//             //     "$unwind": "$products"
+//             // }, 
+//             // {$unwind: "$productId"},
 
-//             res.status(500);
-//         }
+//             {
+                
+//                $lookup:
+//                   {
+//                      from: "products",
+//                      localField: "productId.dest_oid",
+//                      foreignField: "_id",
+//                      as: "product_info"
+//                  }
+//             },
+//             { 
+//                 "$group": 
+//                 { 
+//                     "_id": null, 
+//                     products:
+//                     { 
+//                         $push: { 
+//                             "_id" : "$_id",
+//                             "title":  { "$first": "$product_info.title" },  
+//                             "img":  { "$first": "$product_info.img" },  
+//                             "quantity":  { "$first": "$product.quantity" },  
+//                             "price":  { "$first": "$_price" },  
+                            
+//                         } 
+//                     },
+//                     count:{$sum:1}, 
+//                     totalAmount:{$sum:{ "$first": "$_price" }}, 
+
+//                 } 
+//             }, 
+             
+//         ] ); 
+//         res.status(200).json({
+//             items: cartitems.length !== 0 ? cartitems[0].products : [], 
+//             quantity: cartitems.length !== 0 ? cartitems[0].count : 0, 
+//             total: cartitems.length !== 0 ? cartitems[0].totalAmount : 0});
 
 //         // const carts = await Cart.find();
 //         // res.status(200).json(user_UUID);
 //     }catch(err){
+//         console.log(err);
 //         res.status(500).json(res);
 //     }
 // }); 
+
+router.get("/:user_UUID", async (req, res)=>{
+    try{    
+        var totalPrice = 0;
+        var FetchedItemsCart = [];
+
+        const user_UUID = req.params.user_UUID;
+        const cart = await Cart.find({user_UUID:req.params.user_UUID, status:"incart"});
+        const count = await Cart.count({user_UUID:req.params.user_UUID, status:"incart"});
+ 
+        // const total =  0;
+        
+        // const total = await Cart.aggregate([
+        //     { $match: { user_UUID: user_UUID } },
+        //     {
+        //       $group: {
+        //         _id: null,
+        //         totalPrice: { $sum: '$totalPrice' },
+        //       },
+        //     }
+        //   ]);
+        if(cart){
+            for(var i=0; i<cart.length; i++){  
+                const _quantity = cart[i].product[0].quantity;
+                const itemID = cart[i]._id;
+    
+                const productId = cart[i].product[0].productId;
+                const product = await Products.find({_id:productId});
+                const productImg = product[0].img;
+                const productName = product[0].title;
+                const productPrice = product[0].price*_quantity;
+                const fetchedProdct = { 
+                    _id:itemID,
+                    productId:productId,
+                    img:productImg,
+                    title:productName,
+                    quantity:_quantity,
+                    price:productPrice,
+                };
+                FetchedItemsCart.push(fetchedProdct);
+                totalPrice = totalPrice + productPrice;
+            }
+    
+            res.status(200).json({items: FetchedItemsCart, quantity:count, total:totalPrice});
+        }else{
+            
+            res.status(500);
+        }
+
+        // const carts = await Cart.find();
+        // res.status(200).json(user_UUID);
+    }catch(err){
+        console.log("ERORRRRRRRRCHE " + err)
+        res.status(500).json(res);
+    }
+}); 
   
 // post new item in cart
 
