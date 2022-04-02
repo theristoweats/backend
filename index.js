@@ -9,7 +9,7 @@ const ordersRoute = require("./routes/orders");
 const categoriesRoute = require("./routes/categories");
 const cartRoutes = require("./routes/cart");
 const addressesRoute = require("./routes/addresses");
-// const { Server } = require("socket.io");
+const { Server } = require("socket.io");
 const http = require("http");
 const carriersRoute = require("./routes/carriers");
 const dashboardRoute = require("./routes/dashboard");
@@ -61,44 +61,44 @@ const server = http.createServer(app);
 // const io = require('socket.io')(server, );
 
  
-// const io = new Server(server, {
-//     cors: {origin: "*"}
-// //     cors: {
-// //     origin: "http://localhost:3000/",
-// //     // methods: ["GET", "POST"],
-// //     // allowedHeaders: ["my-custom-header"],
-// //     // credentials: true
-// //   },
-// });
+const io = new Server(server, {
+    cors: {origin: "*"}
+//     cors: {
+//     origin: "http://localhost:3000/",
+//     // methods: ["GET", "POST"],
+//     // allowedHeaders: ["my-custom-header"],
+//     // credentials: true
+//   },
+});
 
-// io.on("connection", (socket) => {
-//     console.log(`User Connected: ${socket.id}`);
-//     socket.on('orderStatusJoin', function(orderId) {
-//         console.log("SOCKET JOIN " + socket.id);
-//         console.log(orderId);
-//         socket.join(orderId);
-//     });
-//     socket.on('liveTrackingJoin', function(carrierID) {
-//         console.log("SOCKET JOIN " + socket.id);
-//         console.log(carrierID);
-//         socket.join(carrierID);
-//     });
-//     socket.on('ordersUpdateJoin', function(userID) {
-//         console.log("SOCKET JOIN " + socket.id);
-//         console.log("user JOIN - "+userID);
-//         socket.join(userID);
-//     }); 
+io.on("connection", (socket) => {
+    console.log(`User Connected: ${socket.id}`);
+    socket.on('orderStatusJoin', function(orderId) {
+        console.log("SOCKET JOIN " + socket.id);
+        console.log(orderId);
+        socket.join(orderId);
+    });
+    socket.on('liveTrackingJoin', function(carrierID) {
+        console.log("SOCKET JOIN " + socket.id);
+        console.log(carrierID);
+        socket.join(carrierID);
+    });
+    socket.on('ordersUpdateJoin', function(userID) {
+        console.log("SOCKET JOIN " + socket.id);
+        console.log("user JOIN - "+userID);
+        socket.join(userID);
+    }); 
 
     
-//     // socket.on('disc', function() {
-//     //     console.log("SOCKET DISC " + socket.id); 
-//     // }); 
+    // socket.on('disc', function() {
+    //     console.log("SOCKET DISC " + socket.id); 
+    // }); 
  
 
-//     socket.on("disconnect", () => {
-//         console.log(socket.connected); // false
-//     });
-// });
+    socket.on("disconnect", () => {
+        console.log(socket.connected); // false
+    });
+});
  
 
 // app.set('socketio', io);

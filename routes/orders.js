@@ -8,6 +8,7 @@ const router = require("express").Router();
 
 // create product
 
+
 router.post("/", verifyToken, async (req,res)=>{
     // const newOrder = new Orders(req.body); 
     try{
@@ -15,43 +16,98 @@ router.post("/", verifyToken, async (req,res)=>{
         const userId = req.body.userId;
         const deliveryAddress = req.body.deliveryAddress;
 
-        const cart = await Cart.find({user_UUID:user_UUID, status:"incart"});
-        if(cart){
+        const cartitems = await Cart.aggregate( [
+            { 
+                $match: 
+                { 
+                    user_UUID: user_UUID,
+                    status:"incart"
+                } 
+            },
+            {
+                $addFields: {
+                    "productId": {
+                        "$map": {
+                          "input": "$product",
+                          "in": {
+                            "$mergeObjects": [
+                                "$$this",
+                                {
+                                  "dest_oid": {
+                                    "$toObjectId": "$$this.productId"
+                                  }
+                                }
+                              ]
+                          }
+                        }
+                    },
+                    "_price":{
+                        "$map": {
+                            "input": "$product",
+                            "in": {
+                                "$multiply": [
+                                    "$$this.quantity",
+                                    "$$this.price"
+                                ]
+                            }
+                        }
+                    }
+                },
                 
-            var totalPrice = 0;
-            var FetchedItemsCart = [];
+            },
+            // { 
+            //     "$unwind": "$products"
+            // }, 
+            // {$unwind: "$productId"},
+
+            {
+                
+               $lookup:
+                  {
+                     from: "products",
+                     localField: "productId.dest_oid",
+                     foreignField: "_id",
+                     as: "product_info"
+                 }
+            },
+            { 
+                "$group": 
+                { 
+                    "_id": null, 
+                    products:
+                    { 
+                        $push: { 
+                            "itemId" : "$_id",
+                            "productId":  { "$first": "$product_info._id" },  
+                            "title":  { "$first": "$product_info.title" },  
+                            "img":  { "$first": "$product_info.img" },  
+                            "quantity":  { "$first": "$product.quantity" },  
+                            "price":  { "$first": "$_price" },  
+                            
+                        } 
+                    },
+                    count:{$sum:1}, 
+                    totalAmount:{$sum:{ "$first": "$_price" }}, 
+
+                } 
+            }, 
+             
+        ] ); 
+        
+
+        if(cartitems.length !== 0){
+            // console.log(cartitems);
 
             const now = new Date();
             const timenow = new Date(now.setHours(now.getHours() + 2));  
-
-            for(var i=0; i<cart.length; i++){  
-                const _quantity = cart[i].product[0].quantity;
-                const itemID = cart[i]._id;
-    
-                const productId = cart[i].product[0].productId;
-                const product = await Products.find({_id:productId});
-                const productImg = product[0].img;
-                const productName = product[0].title;
-                const productPrice = product[0].price*_quantity;
-                const fetchedProdct = { 
-                    itemId:itemID,
-                    productId:productId,
-                    img:productImg,
-                    title:productName,
-                    quantity:_quantity,
-                    price:productPrice,
-                };
-                FetchedItemsCart.push(fetchedProdct);
-                totalPrice = totalPrice + productPrice;
-            }
             const countOrders = await Orders.count()+1;
             const order_create = new Orders(
                 {
                     pro_Id: countOrders,
                     userId: userId, 
                     cart_UUID: user_UUID, 
-                    products: FetchedItemsCart,
-                    amount: totalPrice+70,
+                    products: cartitems[0].products,
+                    amount: cartitems[0].totalAmount+70,
                     deliveryAddress: deliveryAddress,
                     phoneNumber:"0",
                     carrierId:"0",
@@ -60,31 +116,171 @@ router.post("/", verifyToken, async (req,res)=>{
                     time:timenow
                 }
             ); 
+            console.log(order_create);
+            
             const savedOrder = await order_create.save();
             const savedOrderId = savedOrder._id.toString();
-            console.log("da");
+            // console.log("da");
             const updatedCartOrder = await Cart.updateMany({user_UUID:user_UUID,status:"incart"},{
                 "$set": {"orderId":savedOrderId, status:"ordered"}},
                 {new:true});
-
-            console.log(updatedCartOrder);
-            console.log("daa");
-            // findAndModify({
-            //     ... query: {"id": "test_object"},
-            //     ... update: {"$set": {"some_key.param2": "val2_new", "some_key.param3": "val3_new"}},
-            //     ... new: true
-            //     ... })
-            // console.log(savedOrder);
-
-
             res.status(200).json(savedOrder);
+        }else{
+            console.log("nooo");
         }
         
+        
+        // const cart = await Cart.find({user_UUID:user_UUID, status:"incart"});
+        
+        
+        // if(cart){
+            
+        //     var totalPrice = 0;
+        //     var FetchedItemsCart = [];
+
+        //     const now = new Date();
+        //     const timenow = new Date(now.setHours(now.getHours() + 2));  
+
+        //     for(var i=0; i<cart.length; i++){  
+        //         const _quantity = cart[i].product[0].quantity;
+        //         const itemID = cart[i]._id;
+    
+        //         const productId = cart[i].product[0].productId;
+        //         const product = await Products.find({_id:productId});
+        //         const productImg = product[0].img;
+        //         const productName = product[0].title;
+        //         const productPrice = product[0].price*_quantity;
+        //         const fetchedProdct = { 
+        //             itemId:itemID,
+        //             productId:productId,
+        //             img:productImg,
+        //             title:productName,
+        //             quantity:_quantity,
+        //             price:productPrice,
+        //         };
+        //         FetchedItemsCart.push(fetchedProdct);
+        //         totalPrice = totalPrice + productPrice;
+        //     }
+        //     const countOrders = await Orders.count()+1;
+        //     const order_create = new Orders(
+        //         {
+        //             pro_Id: countOrders,
+        //             userId: userId, 
+        //             cart_UUID: user_UUID, 
+        //             products: FetchedItemsCart,
+        //             amount: totalPrice+70,
+        //             deliveryAddress: deliveryAddress,
+        //             phoneNumber:"0",
+        //             carrierId:"0",
+        //             carrierName:"0",
+        //             orderStatus:"pending",
+        //             time:timenow
+        //         }
+        //     ); 
+        //     // const savedOrder = await order_create.save();
+        //     // const savedOrderId = savedOrder._id.toString();
+        //     // console.log("da");
+        //     // const updatedCartOrder = await Cart.updateMany({user_UUID:user_UUID,status:"incart"},{
+        //     //     "$set": {"orderId":savedOrderId, status:"ordered"}},
+        //     //     {new:true});
+
+        //     // console.log(updatedCartOrder);
+        //     // console.log("daa");
+        //     // findAndModify({
+        //     //     ... query: {"id": "test_object"},
+        //     //     ... update: {"$set": {"some_key.param2": "val2_new", "some_key.param3": "val3_new"}},
+        //     //     ... new: true
+        //     //     ... })
+        //     console.log(order_create);
+
+
+        //     // res.status(200).json(savedOrder);
+        // }
+        
     }catch(err){
+        console.log(err);
         res.status(500).json(err);
     }
 
 });
+
+// router.post("/", verifyToken, async (req,res)=>{
+//     // const newOrder = new Orders(req.body); 
+//     try{
+//         const user_UUID = req.body.user_UUID;
+//         const userId = req.body.userId;
+//         const deliveryAddress = req.body.deliveryAddress;
+
+//         const cart = await Cart.find({user_UUID:user_UUID, status:"incart"});
+//         if(cart){
+                
+//             var totalPrice = 0;
+//             var FetchedItemsCart = [];
+
+//             const now = new Date();
+//             const timenow = new Date(now.setHours(now.getHours() + 2));  
+
+//             for(var i=0; i<cart.length; i++){  
+//                 const _quantity = cart[i].product[0].quantity;
+//                 const itemID = cart[i]._id;
+    
+//                 const productId = cart[i].product[0].productId;
+//                 const product = await Products.find({_id:productId});
+//                 const productImg = product[0].img;
+//                 const productName = product[0].title;
+//                 const productPrice = product[0].price*_quantity;
+//                 const fetchedProdct = { 
+//                     itemId:itemID,
+//                     productId:productId,
+//                     img:productImg,
+//                     title:productName,
+//                     quantity:_quantity,
+//                     price:productPrice,
+//                 };
+//                 FetchedItemsCart.push(fetchedProdct);
+//                 totalPrice = totalPrice + productPrice;
+//             }
+//             const countOrders = await Orders.count()+1;
+//             const order_create = new Orders(
+//                 {
+//                     pro_Id: countOrders,
+//                     userId: userId, 
+//                     cart_UUID: user_UUID, 
+//                     products: FetchedItemsCart,
+//                     amount: totalPrice+70,
+//                     deliveryAddress: deliveryAddress,
+//                     phoneNumber:"0",
+//                     carrierId:"0",
+//                     carrierName:"0",
+//                     orderStatus:"pending",
+//                     time:timenow
+//                 }
+//             ); 
+//             const savedOrder = await order_create.save();
+//             const savedOrderId = savedOrder._id.toString();
+//             console.log("da");
+//             const updatedCartOrder = await Cart.updateMany({user_UUID:user_UUID,status:"incart"},{
+//                 "$set": {"orderId":savedOrderId, status:"ordered"}},
+//                 {new:true});
+
+//             console.log(updatedCartOrder);
+//             console.log("daa");
+//             // findAndModify({
+//             //     ... query: {"id": "test_object"},
+//             //     ... update: {"$set": {"some_key.param2": "val2_new", "some_key.param3": "val3_new"}},
+//             //     ... new: true
+//             //     ... })
+//             // console.log(savedOrder);
+
+
+//             res.status(200).json(savedOrder);
+//         }
+        
+//     }catch(err){
+//         res.status(500).json(err);
+//     }
+
+// });
 
 
 router.put("/:id", verifyTokenAndAdmin, async (req, res) =>{
