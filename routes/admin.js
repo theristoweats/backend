@@ -278,23 +278,23 @@ router.post("/login", async (req, res)=>{
 
 
 
-// router.post("/register", verifyTokenAndAdmin, async (req, res) => {
-//     req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.SECRET_KEY).toString();
-//     const newAdmin = new Admin(req.body);
-//     console.log(newAdmin);
-//     try{
-//         const admin = await Admin.findOne({email:req.body.email});
-//         if(!admin){
-//             console.log(newAdmin);
-//             const savedAdmin = await newAdmin.save();
-//             res.status(201).json(savedAdmin);
-//         }else{
-//             res.status(405).json("Email taken");
-//         }
-//     }catch(err){
-//         res.status(500).json(err);
-//     }
-// });
+router.post("/register", async (req, res) => {
+    req.body.password = CryptoJS.AES.encrypt(req.body.password, process.env.SECRET_KEY).toString();
+    const newAdmin = new Admin(req.body);
+    console.log(newAdmin);
+    try{
+        const admin = await Admin.findOne({email:req.body.email});
+        if(!admin){
+            console.log(newAdmin);
+            const savedAdmin = await newAdmin.save();
+            res.status(201).json(savedAdmin);
+        }else{
+            res.status(405).json("Email taken");
+        }
+    }catch(err){
+        res.status(500).json(err);
+    }
+});
  
  
 
