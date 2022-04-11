@@ -223,6 +223,7 @@ router.get("/:user_UUID", async (req, res)=>{
                             "img":  { "$first": "$product_info.img" },  
                             "quantity":  { "$first": "$product.quantity" },  
                             "price":  { "$first": "$_price" },  
+                            "transform":  { "$first": "$product.transform" },  
                             
                         } 
                     },
